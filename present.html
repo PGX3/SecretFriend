@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Desejos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+        }
+
+        /* Intro Screen */
+        #introScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000000;
+            z-index: 9999;
+            transition: opacity 0.6s ease;
+        }
+
+        #introScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-content {
+            text-align: center;
+            color: white;
+        }
+
+        .intro-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .intro-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .intro-subtitle {
+            font-size: 1rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+            opacity: 0.7;
+        }
+
+        .btn-reveal {
+            background: transparent;
+            color: white;
+            border: 1px solid white;
+            padding: 15px 50px;
+            font-size: 0.95rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reveal:hover {
+            background: white;
+            color: black;
+        }
+
+        /* Main Content */
+        #mainScreen {
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            padding: 60px 0 80px;
+        }
+
+        #mainScreen.show {
+            opacity: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            font-weight: 300;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        /* Filter Tabs */
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 50px;
+            padding: 0 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: transparent;
+            color: #666;
+            border: 1px solid #e0e0e0;
+            padding: 12px 30px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            border-color: #000000;
+            color: #000000;
+        }
+
+        .filter-btn.active {
+            background: #000000;
+            color: white;
+            border-color: #000000;
+        }
+
+        /* Current Person Display */
+        .current-person {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .current-person h2 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .current-person span {
+            font-weight: 500;
+        }
+
+        /* Product Cards */
+        .product-card {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            border-color: #000000;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .product-image {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            overflow: hidden;
+            background: #f8f8f8;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-content {
+            padding: 30px;
+        }
+
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .product-description {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 25px;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        .btn-product {
+            display: inline-block;
+            background: #000000;
+            color: white;
+            text-decoration: none;
+            padding: 12px 35px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border: 1px solid #000000;
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn-product:hover {
+            background: white;
+            color: black;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 40px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .footer p {
+            font-size: 0.9rem;
+            font-weight: 300;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .filter-btn {
+                padding: 10px 20px;
+                font-size: 0.85rem;
+            }
+
+            .product-image {
+                height: 280px;
+            }
+
+            .product-content {
+                padding: 25px;
+            }
+
+            .product-name {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Intro Screen -->
+    <div id="introScreen">
+        <div class="intro-content">
+            <div class="intro-icon">🎁</div>
+            <h1 class="intro-title">AMIGO SECRETO</h1>
+            <p class="intro-subtitle">Lista de desejos</p>
+            <button class="btn-reveal" onclick="revealWishlist()">ABRIR</button>
+        </div>
+    </div>
+
+    <!-- Main Screen -->
+    <div id="mainScreen">
+        <div class="container">
+            <div class="header">
+                <h1>LISTA DE DESEJOS</h1>
+                <p>ESCOLHA A PESSOA PARA VER SEUS PRESENTES</p>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="filter-container" id="filterContainer">
+                <!-- Buttons will be inserted here -->
+            </div>
+
+            <!-- Current Person Display -->
+            <div class="current-person" id="currentPersonDisplay">
+                <h2>LISTA DE <span id="currentPersonName"></span></h2>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="row" id="productsGrid">
+                <!-- Products will be inserted here -->
+            </div>
+
+            <div class="footer">
+                <p>Obrigado por participar</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ========== CONFIGURE AS LISTAS DE CADA PESSOA AQUI ==========
+        const wishLists = {
+          
+            "Pedro": [
+                {
+                    name: "Chinelo Havaianas Top Max Branco",
+                    description: "Chinelo da havaianas branco, 39/40 ou 41/42",
+                    image: "https://havaianas.com.br/cdn/shop/files/4148608-7854-top-max-comfort-1.png?v=1744399127",
+                    link: "https://havaianas.com.br/products/chinelo-havaianas-top-max-comfort-4148608_7854?variant=46208077299969"
+                },
+                {
+                    name: "Chinelo Olimpikus Sereno",
+                    description: "Numeração 39/40",
+                    image: "https://vulcabras.vtexassets.com/arquivos/ids/286815-1300-1300?v=638380672451070000&width=1300&height=1300&aspect=true",
+                    link: "https://www.olympikus.com.br/chinelo-olympikus-sereno-unissex-54104269-3-924/p?utm_source=google&utm_campaign=googlepla&gad_source=1&gad_campaignid=22747410143&gbraid=0AAAAACpLBwtEPpG9TGfd_Y3P3WIv0q9hH&gclid=CjwKCAiA3L_JBhAlEiwAlcWO5_CWUoLurZNCBGX_XEQSGYeejnk8B1bTYMGudZoTqV8plS5_3peoEBoCq3oQAvD_BwE"
+                },
+                {
+                    name: "Copo térmico da go case com versículo",
+                    description: "Versículo João 3:16",
+                    image: "https://ik.imagekit.io/gocase/engines/uploads/previewimage/54949/src/cc2b93a58e35c37fccaaf80bfce7f823.png",
+                    link: "https://www.gocase.com.br/copo-termico-daily-ebook-meu-versiculo/p/9081"
+                },
+                {
+                    name: "Carregador Portátil Baseus",
+                    description: "",
+                    image: "https://http2.mlstatic.com/D_NQ_NP_2X_913964-MLB81267156816_122024-F-power-bank-baseus-turbo-airpow-lite-10000mah-15w.webp",
+                    link: "https://produto.mercadolivre.com.br/MLB-3937876083-power-bank-baseus-turbo-airpow-lite-10000mah-15w-_JM?searchVariation=186509242075&pdp_filters=price%3A*-150#polycard_client=search-nordic&searchVariation=186509242075&search_layout=grid&position=5&type=item&tracking_id=e688511b-118f-42e7-b0ac-69f1ea19b765"
+                }
+            ],
+            "Laura": [
+                                {
+                    name: "Kit skin care",
+                    description: "Kit para skin care",
+                    image: "https://creamy.vtexassets.com/arquivos/ids/158098-1200-auto?v=638906411017100000&width=1200&height=auto&aspect=true",
+                    link: "https://www.creamy.com.br/duo-limpador-glicerinado-calming-cream/p"
+                },
+                {
+                    name: "Argolinhas",
+                    description: "Argolinhas de prata",
+                    image: "https://cdn.sistemawbuy.com.br/arquivos/a4766a3e2f288255de1c964fb6b50246/produtos/680c394df39f9/img_4404-680e7205ee589.jpeg",
+                    link: "https://www.uselilly.com/argolinhas-medalha-trevo-cravejado-sophie/"
+                },
+                {
+                    name: "Duo Calming Cream + Calming Body Cream",
+                    description: "Kit para hidratação corporal",
+                    image: "https://creamy.vtexassets.com/arquivos/ids/158109-1200-auto?v=638906416217370000&width=1200&height=auto&aspect=true",
+                    link: "https://www.creamy.com.br/duo-calming-cream-e-calming-body-cream/p"
+                },
+                {
+                    name: "Duo Niacinamide + Calming Cream",
+                    description: "Kit para Skin care",
+                    image: "https://creamy.vtexassets.com/arquivos/ids/158091-1200-auto?v=638906408355900000&width=1200&height=auto&aspect=true",
+                    link: "https://www.creamy.com.br/duo-niacinamide-calming-cream/p"
+                },
+                {
+                    name: "Pratas em geral",
+                    description: "Qualquer prata",
+                    image: "",
+                    link: ""
+                },               
+                {
+                    name: "Bolsa da loja Godê",
+                    description: "Bolsa branca, verificar na loja godê",
+                    image: "",
+                    link: ""
+                }
+
+            ]
+        };
+
+        let currentPerson = Object.keys(wishLists)[0];
+
+        function revealWishlist() {
+            document.getElementById('introScreen').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('mainScreen').classList.add('show');
+            }, 100);
+            renderFilterButtons();
+            renderProducts();
+        }
+
+        function renderFilterButtons() {
+            const container = document.getElementById('filterContainer');
+            const people = Object.keys(wishLists);
+            
+            container.innerHTML = people.map((person, index) => `
+                <button 
+                    class="filter-btn ${index === 0 ? 'active' : ''}" 
+                    onclick="filterByPerson('${person}')"
+                >
+                    ${person.toUpperCase()}
+                </button>
+            `).join('');
+        }
+
+        function filterByPerson(person) {
+            currentPerson = person;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.trim() === person.toUpperCase()) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update current person display
+            document.getElementById('currentPersonName').textContent = person.toUpperCase();
+            
+            // Render products
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const products = wishLists[currentPerson];
+            
+            if (!products || products.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <p>Nenhum presente na lista ainda.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = products.map(product => `
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="${product.image}" alt="${product.name}">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-description">${product.description}</p>
+                            <a href="${product.link}" target="_blank" class="btn-product">
+                                VER PRODUTO
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
